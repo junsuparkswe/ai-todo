@@ -1,13 +1,15 @@
 "use client"
 
-import { useQuery } from "convex/react"
+import { useConvexAuth, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { TodoItem } from "./todo-item"
 import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function TodoList() {
-  const todos = useQuery(api.todos.list, {})
+  const { isAuthenticated } = useConvexAuth()
+  
+  const todos = useQuery(api.todos.list, isAuthenticated ? {} : "skip")
 
   if (todos === undefined) {
     return (
