@@ -5,7 +5,8 @@
 * **Auth:** Clerk (configured with org-based multi-tenancy)
 * **Database:** Convex (configured with schema and security rules)
 * **Background Jobs:** Inngest (locally tested and serving endpoints)
-* **Status:** Phase 4 (`04-inngest`) is complete. Ready for Phase 5 (`05-sentry`).
+* **Monitoring:** Sentry (configured across client, server, and edge runtimes with ad-blocker tunneling)
+* **Status:** Phase 5 (`05-sentry`) is complete. Ready for next phase (AI Integration).
 
 ---
 
@@ -29,7 +30,14 @@
 
 ---
 
-## Next Steps (Phase 5)
-* Create branch `05-sentry`.
-* Integrate Sentry SDK.
-* Verify errors propagate correctly to Sentry.
+## Key Phase 5 Resolutions
+
+### 1. Clerk Middleware Tunnel Block
+* **Problem:** Sentry's `tunnelRoute` is set to `/monitoring` to bypass ad-blockers, but Clerk middleware was intercepting this route and redirecting unauthenticated telemetry payloads to `/sign-in`.
+* **Solution:** Added `'/monitoring(.*)'` to Clerk's `isPublicRoute` matcher in `proxy.ts`.
+
+---
+
+## Next Steps
+* Create next branch (e.g., AI Integration / MCP Server).
+* Check the updated `IMPLEMENTATION_PLAN.md` for specific details.

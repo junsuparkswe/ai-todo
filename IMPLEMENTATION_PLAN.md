@@ -42,6 +42,7 @@ Build a Next.js Todo App integrating Clerk (Auth), Convex (Database), Inngest (B
 *   **Goal:** Add Background Jobs.
 *   **Verification:** [DONE] Setup Inngest server, registered background tasks, configured Clerk middleware bypass for /api/inngest, and handled unauthenticated query lifecycle.
 
-### Phase 5: Branch `05-sentry` (Current)
+### Phase 5: Branch `05-sentry` [DONE]
 *   **Goal:** Add Application Monitoring.
-*   **Verification:** Errors appear in Sentry dashboard.
+*   **Verification:** [DONE] Sentry SDK integrated across client, server, and edge runtimes. Verified test error reports in the dashboard. Resolved Clerk middleware conflicts on the tunnel route `/monitoring`.
+
