@@ -27,19 +27,18 @@ Build a Next.js Todo App integrating Clerk (Auth), Convex (Database), Inngest (B
     *   Test auth state persistence across reloads.
     *   Document the manual test cases for Auth.
 
-### Phase 3: Branch `03-convex` (Current)
+### Phase 3: Branch `03-convex` [DONE]
 *   **Goal:** Implement Database & Core UI with Workspace Focus.
 *   **User Tasks:**
     *   **Schema Definition**: [DONE] Defined `todos` with essential fields.
     *   **Security Logic**: [DONE] Implemented `orgId` verification.
     *   **CRUD**: [DONE] Wrote `create`, `get`, `list`, `toggle`, and `remove` functions.
-    *   **UI Components**: Build `TodoInput`, `TodoList`, and `TodoItem`. **Refine the Todo Card UI and overall layout for a polished, "nice" look and feel.**
+    *   **UI Components**: [DONE] Built modularized `TodoInput`, `TodoList`, and `TodoItem` with a polished UI.
 *   **Verification:** 
-    *   Perform full CRUD.
-    *   **Privacy Test**: Confirm User A cannot see User B's tasks.
-    *   **Org Test**: Confirm User A cannot see tasks from Org B even if they are a member of Org A.
+    *   [DONE] Full CRUD verified on `/test` page.
+    *   [DONE] Privacy & Org isolation verified.
 
-### Phase 4: Branch `04-inngest`
+### Phase 4: Branch `04-inngest` (Current)
 *   **Goal:** Add Background Jobs.
 *   **Verification:** Inngest dev server runs, functions trigger via UI/cron.
 
