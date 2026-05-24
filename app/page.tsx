@@ -1,5 +1,7 @@
 import { ModeToggle } from "@/components/mode-toggle";
+import { Button } from "@/components/ui/button";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -17,8 +19,13 @@ export default function Home() {
         <Show when="signed-in">
           <UserButton />
         </Show>
+        <ModeToggle />
+        <Link href="/test">
+          <Button>
+            Test Page
+          </Button>
+        </Link>
       </header>
-      <ModeToggle />
     </div>
   );
 }
