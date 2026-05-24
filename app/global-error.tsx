@@ -4,6 +4,11 @@ import * as Sentry from "@sentry/nextjs";
 import NextError from "next/error";
 import { useEffect } from "react";
 
+/**
+ * Reports the given error to Sentry and renders Next.js's default error page.
+ *
+ * @param error - The error that triggered this boundary; may include an optional `digest` string
+ */
 export default function GlobalError({
   error,
 }: {
