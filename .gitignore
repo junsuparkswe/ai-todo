@@ -47,3 +47,4 @@ convex/_generated/
 # Agents
 .agents/
 skills-lock.json
+.antigravitycli
