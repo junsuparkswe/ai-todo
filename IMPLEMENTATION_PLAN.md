@@ -46,3 +46,42 @@ Build a Next.js Todo App integrating Clerk (Auth), Convex (Database), Inngest (B
 *   **Goal:** Add Application Monitoring.
 *   **Verification:** [DONE] Sentry SDK integrated across client, server, and edge runtimes. Verified test error reports in the dashboard. Resolved Clerk middleware conflicts on the tunnel route `/monitoring`.
 
+### Phase 6: Branch `06-ai-setup-command-bar`
+*   **Goal:** Set up Vercel AI SDK and build AI Command Bar.
+*   **User Tasks:**
+    *   Register free Gemini API key on Google AI Studio.
+    *   Configure Vercel AI SDK to support both Gemini (production/cloud) and swappable local Ollama models (via environment variables).
+    *   Build natural language Command Bar to parse user commands (e.g. *"add buy milk tomorrow"*) using Gemini, executing Convex mutations on behalf of the user.
+*   **Verification:** Commands parse correctly and write todos to Convex with appropriate metadata.
+
+### Phase 7: Branch `07-ai-chat-assistant`
+*   **Goal:** Build streaming AI Chat Assistant.
+*   **User Tasks:**
+    *   Create a sliding sidebar chat panel.
+    *   Implement real-time token-by-token streaming UI using Vercel AI SDK.
+    *   Equip the chat assistant with tools to query and mutate todos in Convex on behalf of the user.
+*   **Verification:** User can chat with the assistant, see streaming responses, and ask the assistant to modify their todo list.
+
+### Phase 8: Branch `08-ai-background-jobs`
+*   **Goal:** Set up asynchronous AI background jobs with Inngest.
+*   **User Tasks:**
+    *   Configure an Inngest background job triggered on todo creation to auto-categorize the todo (e.g., "Work", "Personal") using Gemini and write it to Convex.
+    *   Create a recurring daily summary job using Gemini to compile a report of completed/uncompleted todos.
+*   **Verification:** Creating a todo triggers the categorization function in the background, updating its category metadata.
+
+### Phase 9: Branch `09-ai-self-hosting`
+*   **Goal:** Integrate local, self-hosted LLM (Ollama).
+*   **User Tasks:**
+    *   Install Ollama locally and run a model (like Llama 3 or Mistral).
+    *   Set up local environment variables to route Vercel AI SDK queries to the local Ollama instance.
+    *   Verify that the Command Bar and Chat Assistant functions work seamlessly with the self-hosted local model.
+*   **Verification:** App successfully uses the local model without any changes to the core UI/logic code.
+
+### Phase 10: Branch `10-automated-testing`
+*   **Goal:** Add Vitest Unit Testing and Playwright E2E Testing.
+*   **User Tasks:**
+    *   Set up Vitest and write unit tests for critical Convex helper functions and schema validation.
+    *   Set up Playwright and write E2E tests covering the Clerk auth redirect, core todo CRUD operations, and the AI command/chat integrations.
+*   **Verification:** Tests pass locally and can be configured as a verification check in git branch management.
+
+

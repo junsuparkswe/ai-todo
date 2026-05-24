@@ -39,5 +39,7 @@
 ---
 
 ## Next Steps
-* Create next branch (e.g., AI Integration / MCP Server).
-* Check the updated `IMPLEMENTATION_PLAN.md` for specific details.
+* Create branch `06-ai-setup-command-bar`.
+* Register for a Gemini API key on Google AI Studio.
+* Setup Vercel AI SDK and integrate the Command Bar.
+
