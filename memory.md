@@ -6,7 +6,8 @@
 * **Database:** Convex (configured with schema and security rules)
 * **Background Jobs:** Inngest (locally tested and serving endpoints)
 * **Monitoring:** Sentry (configured across client, server, and edge runtimes with ad-blocker tunneling)
-* **Status:** Phase 5 (`05-sentry`) is complete. Ready for next phase (AI Integration).
+* **AI:** Vercel AI SDK v6 with Vercel AI Gateway (`@ai-sdk/google`, model string passed directly e.g. `"google/gemini-2.0-flash-lite"`)
+* **Status:** Phase 6 (`06-ai-setup-chat`) in progress.
 
 ---
 
@@ -38,8 +39,30 @@
 
 ---
 
-## Next Steps
-* Create branch `06-ai-setup-command-bar`.
-* Register for a Gemini API key on Google AI Studio.
-* Setup Vercel AI SDK and integrate the Command Bar.
+## Key Phase 6 Resolutions
 
+### 1. AI Streaming Architecture (Inngest vs. Convex)
+* **Decision:** Using **Convex as the streaming bridge** rather than Inngest Durable Endpoints.
+* **Flow:** Client calls `messages.send` (Convex mutation) → gets back `aiMessageId` → fires `app/chat.message.sent` Inngest event → Inngest calls LLM → patches Convex message via internal HTTP action → client `useQuery` reactively updates.
+
+### 2. Convex TypeScript Node Types
+* **Problem:** `process` was not recognized in `convex/http.ts` because `convex/tsconfig.json` didn't include Node types.
+* **Solution:** Added `"types": ["node"]` to `compilerOptions` in `convex/tsconfig.json`. Applies to all files in `convex/`.
+
+### 3. Convex Internal HTTP Actions for Inngest
+* **Decision:** Inngest communicates with Convex via two HTTP actions in `convex/http.ts`, both protected by a shared `CONVEX_INTERNAL_SECRET` env var checked in the `Authorization` header:
+  * `POST /internal/patch-message` — calls `internal.messages.patch`
+  * `GET /internal/fetch-conversation` — calls `internal.messages.fetch` (internalQuery, still to be implemented)
+
+---
+
+## Phase 6 Remaining Tasks
+* Add `internalQuery` called `fetch` to `convex/messages.ts` (fetches messages by conversationId, no auth)
+* Fix `GET /internal/fetch-conversation` in `convex/http.ts` to use query params instead of request body (GET requests don't have bodies)
+* Fix `inngest/functions.ts` `fetch-conversation` step to pass conversationId as a query param, and call `.json()` on the ky response
+* Fix `messages` array construction in `inngest/functions.ts` — spread previous messages array + append new user message object (not string concatenation)
+* Update `app/api/chat/route.ts` to fire `app/chat.message.sent` with correct payload
+* Verify end-to-end pipeline works
+
+## Memory Usage
+* Use `memory.md` in the repo root (this file) — not the external Claude memory directory.
