@@ -1,7 +1,7 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Use the Next.js skill if available. Only fall back to `node_modules/next/dist/docs/` if no skill is installed or the task involves an undocumented edge case. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 # Todo App AI Agent Instructions
@@ -15,6 +15,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 4. **COMMIT SCOPING:** Guide the user to make atomic, conventional commits (e.g., `feat:`, `fix:`, `chore:`). Do not make massive unstructured commits.
 5. **VERIFICATION:** ALWAYS remind the user to run `npm run lint` and `npm run build` to verify the codebase before finishing a branch or creating a PR.
 6. **FOLLOW THE PLAN:** Refer to `IMPLEMENTATION_PLAN.md` in the root directory for the step-by-step roadmap.
+7. **NO UNSOLICITED COMMANDS:** Do not write, suggest, or execute shell commands, terminal inputs, package installation commands, or git operations unless the user explicitly asks for them in the prompt (e.g., "Tell me the command to..."). Focus on guiding the user conceptually on what tasks need to be performed.
 
 <!-- convex-ai-start -->
 

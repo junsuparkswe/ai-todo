@@ -1,5 +1,6 @@
-import { TodoInput } from "@/features/components/todos/todo-input"
-import { TodoList } from "@/features/components/todos/todo-list"
+import { TodoInput } from "@/features/todos/components/todo-input";
+import { TodoList } from "@/features/todos/components/todo-list";
+import { InngestDemo } from "@/components/inngest-demo";
 
 export default function TestPage() {
   return (
@@ -7,7 +8,9 @@ export default function TestPage() {
       <div className="flex flex-col flex-1 mt-10 max-w-200 items-center gap-4">
         <TodoInput />
         <TodoList />
+        <InngestDemo />
+        {/* <AiChat /> */}
       </div>
     </main>
-  )
+  );
 }
