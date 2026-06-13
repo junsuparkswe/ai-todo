@@ -205,6 +205,41 @@ export const toggle = mutation({
   }
 })
 
+export const patch = mutation({
+  args: {
+    todoId: v.id("todos"),
+    text: v.optional(v.string()),
+    dueDate: v.optional(v.number()),
+    completedAt: v.optional(v.number())
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.auth.getUserIdentity()
+
+    if (!user) {
+      throw new Error("Unauthenticated")
+    }
+
+    const todo = await ctx.db.get("todos", args.todoId)
+
+    if (!todo) {
+      throw new Error("Todo not found")
+    }
+
+    if (user.orgId !== todo.orgId) {
+      throw new Error("Unauthorized")
+    }
+
+    const now = Date.now()
+
+    await ctx.db.patch("todos", args.todoId, {
+      text: args.text ?? todo.text,
+      dueDate: args.dueDate ?? todo.dueDate,
+      completedAt: args.completedAt ?? todo.completedAt,
+      updatedAt: now
+    })
+  }
+})
+
 export const remove = mutation({
   args: {
     id: v.id("todos")

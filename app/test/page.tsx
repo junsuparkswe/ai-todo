@@ -9,7 +9,6 @@ export default function TestPage() {
         <TodoInput />
         <TodoList />
         <InngestDemo />
-        {/* <AiChat /> */}
       </div>
     </main>
   );

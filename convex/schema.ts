@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { ModelMessage } from "./validators";
 
 export default defineSchema({
   todos: defineTable({
@@ -58,7 +59,10 @@ export default defineSchema({
       v.literal("done"),
       v.literal("error")
     ),
-    createdAt: v.number()
+    createdAt: v.number(),
+    modelMessages: v.optional(
+      v.array(ModelMessage)
+    )
   })
     .index("by_conversation_status", ["conversationId", "status"])
 });

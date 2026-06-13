@@ -4,10 +4,9 @@
 Build a Next.js Todo App integrating Clerk (Auth), Convex (Database), Inngest (Background Jobs), and Sentry (Monitoring). This project serves as a practice ground and portfolio piece for the user. **Note:** Base functionality should be kept minimal to prioritize advanced features like AI Integration and an MCP Server for the user's job hunt.
 
 ## CRITICAL AGENT INSTRUCTIONS
-1. **NO DIRECT IMPLEMENTATION:** The user will write the code. Do not write the code for them. Provide guidance, review work, and explain concepts.
-2. **NO UNSOLICITED CODE:** Do not provide code examples unless explicitly asked (e.g., "Show me how to...").
-3. **TESTING IS MANDATORY:** Every branch must include verification tests (manual or automated) before completion.
-4. **FORCED MULTI-TENANCY:** Every todo must belong to an `orgId`. Clerk enforces organization membership for all users.
+See `AGENTS.md` for the canonical agent rules (no direct implementation, no unsolicited code, branch/commit scoping, verification, etc.). Plan-specific constraints:
+- **TESTING IS MANDATORY:** Every branch must include verification tests (manual or automated) before completion.
+- **FORCED MULTI-TENANCY:** Every todo must belong to an `orgId`. Clerk enforces organization membership for all users.
 
 ## Branch Strategy & Implementation Steps
 
@@ -46,22 +45,22 @@ Build a Next.js Todo App integrating Clerk (Auth), Convex (Database), Inngest (B
 *   **Goal:** Add Application Monitoring.
 *   **Verification:** [DONE] Sentry SDK integrated across client, server, and edge runtimes. Verified test error reports in the dashboard. Resolved Clerk middleware conflicts on the tunnel route `/monitoring`.
 
-### Phase 6: Branch `06-ai-setup-chat`
+### Phase 6: Branch `06-ai-setup-chat` [DONE]
 *   **Goal:** Set up Vercel AI SDK with Vercel AI Gateway and configure Inngest routing.
 *   **User Tasks:**
     *   **[DONE]** Configure Vercel AI SDK to route model requests through Vercel AI Gateway using `AI_GATEWAY_API_KEY`, supporting swappable cloud providers (Google, OpenAI, Anthropic, etc.).
     *   **[DONE]** Define Convex schema for `conversations` and `messages`.
     *   **[DONE]** Implement Convex functions for `conversations.ts`.
-    *   Implement Convex functions for `messages.ts` to handle streaming mutations.
-    *   Set up Inngest event handlers to process AI chat inputs, buffer stream replies, and execute Convex mutations to patch message content.
-*   **Verification:** Configuration handles a basic test event via Inngest, communicates with Vercel AI Gateway, and patches tokens into Convex successfully.
+    *   **[DONE]** Implement Convex functions for `messages.ts` to handle streaming mutations.
+    *   **[DONE]** Set up Inngest event handlers to process AI chat inputs, buffer stream replies, and execute Convex mutations to patch message content.
+*   **Verification:** [DONE] Configuration handles a basic test event via Inngest, communicates with Vercel AI Gateway, and patches tokens into Convex successfully.
 
 ### Phase 7: Branch `07-ai-chat-interface`
 *   **Goal:** Build a full Chat Window with Conversation History.
 *   **User Tasks:**
-    *   Build a dedicated Chat Interface that allows starting a new conversation and selecting/viewing past conversations.
-    *   Connect the UI to Convex `useQuery` hooks to reactively stream tokens as they are patched by Inngest.
-    *   Provide the AI Chat Assistant with tools (via Vercel AI SDK) to search, create, and toggle todos in Convex on behalf of the user, routed instantly via Inngest.
+    *   **[DONE]** Proof-of-concept: basic chat UI in `features/ai/components/ai-chat.tsx` using Convex `useQuery` for reactive message updates. Verified full flow: create conversation → send message → Inngest patches AI response → UI updates reactively.
+    *   **[DONE]** Provide the AI Chat Assistant with tools (via Vercel AI SDK) to search, create, and toggle todos in Convex on behalf of the user. (6 tools + structured `modelMessages` history — see memory #13.)
+    *   **[BUILT — verify live + add titles]** Build polished Chat Interface with conversation history sidebar. `/chat` route, persistent sidebar (`usePaginatedQuery`), ai-elements chat pane — lint+build green (memory #14). Remaining: AI-generated conversation titles (memory TODO step 5) + a live run-through.
 *   **Verification:** User can see past conversations, start new ones, chat with streaming responses (via Convex reactivity), and see their todo list mutate reactively when asking the assistant to make edits.
 
 ### Phase 8: Branch `08-ai-background-jobs`
