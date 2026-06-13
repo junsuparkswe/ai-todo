@@ -1,12 +1,11 @@
 // src/inngest/functions.ts
-import { generateText } from "ai";
+import { generateText, type ModelMessage, stepCountIs } from "ai";
 import { inngest } from "./client";
-import ky from "ky";
-import { messageSchema } from "@/lib/schema";
-import { z } from "zod";
 import { chatMessageSent } from "./event-types";
-
-const messagesSchema = z.array(messageSchema)
+import { ConvexHttpClient } from "convex/browser";
+import { makeTodoTools } from "./tools";
+import { api } from "@/convex/_generated/api";
+import { patchMessage } from "./convex-internal";
 
 export const processMessage = inngest.createFunction(
   {
@@ -14,58 +13,67 @@ export const processMessage = inngest.createFunction(
     triggers: [chatMessageSent],
   },
   async ({ event, step }) => {
+    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    convex.setAuth(event.data.clerkToken);
+
     const messages = await step.run("fetch-conversation", async () => {
-      return await ky.get(`${process.env.CONVEX_HTTP_ACTIONS_URL}/internal/fetch-conversation`, {
-        headers: {
-          Authorization: process.env.CONVEX_INTERNAL_SECRET,
-        },
-        searchParams: {
-          conversationId: event.data.conversationId
-        }
-      }).json()
-    })
-
-    const result = messagesSchema.safeParse(messages)
-
-    if (!result.success) {
-      await step.run("patch-error", async () => {
-        await ky.post(`${process.env.CONVEX_HTTP_ACTIONS_URL}/internal/patch-message`, {
-          headers: {
-            Authorization: process.env.CONVEX_INTERNAL_SECRET,
-          },
-          json: {
-            _id: event.data.aiMessageId,
-            status: "error",
-            content: ""
-          },
-        });
-      })
-      return { error: "Wrong message type" }
-    }
+      return await convex.query(api.messages.fetch, {
+        conversationId: event.data.conversationId,
+      });
+    });
 
     const response = await step.run("message-ai", async () => {
-      return await generateText({
-        model: "google/gemini-3.1-flash-lite",
-        messages: result.data.map(message => ({
-          role: message.role,
-          content: message.content
-        }))
+      const r = await generateText({
+        model: "google/gemini-3-flash",
+        messages: messages.flatMap((message) => {
+          if (message.modelMessages) {
+            return message.modelMessages as unknown as ModelMessage[];
+          } else {
+            return {
+              role: message.role,
+              content: message.content,
+            } as ModelMessage;
+          }
+        }),
+        tools: makeTodoTools(convex),
+        stopWhen: stepCountIs(15),
+        system:
+          "You are an assistant for a simple todo app. The user may prompt you to take certain actions on a todo. The todo IDs are not user-visible; when the user refers to one or more todos, call listTodos first to resolve the ids, then act.",
       });
+      return {
+        text: r.text ?? "",
+        toolNames: r.steps.flatMap((s) => s.toolCalls.map((c) => c.toolName)),
+        modelMessages: r.response.messages,
+      };
     });
 
     await step.run("patch-convex", async () => {
-      await ky.post(`${process.env.CONVEX_HTTP_ACTIONS_URL}/internal/patch-message`, {
-        headers: {
-          Authorization: process.env.CONVEX_INTERNAL_SECRET,
-        },
-        json: {
-          _id: event.data.aiMessageId,
-          content: response.text,
-          status: "done",
-        },
+      await patchMessage({
+        _id: event.data.aiMessageId,
+        content: response.text,
+        status: "done",
       });
     });
 
-    return { aiMessageId: event.data.aiMessageId }
+    const isFirstTurn = !messages.some((m) => m.role === "assistant");
+    if (isFirstTurn) {
+      await step.run("generate-title", async () => {
+        const firstMessage = messages.find(m => m.role === "user")
+        if (!firstMessage) return;
+
+        const r = await generateText({
+          model: "google/gemini-2.5-flash-lite",
+          system: "Create conversation title based on first prompt from the user, less than 5 words, no quotes",
+          prompt: firstMessage.content
+        })
+
+        await convex.mutation(api.conversations.updateTitle, {
+          conversationId: event.data.conversationId,
+          title: r.text.trim()
+        })
+      })
+    }
+
+    return { aiMessageId: event.data.aiMessageId };
   },
 );

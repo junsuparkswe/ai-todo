@@ -1,11 +1,14 @@
 import { v } from "convex/values";
-import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
+import { ModelMessage } from "./validators";
+import schema from "./schema";
 
 export const send = mutation({
   args: {
     content: v.string(),
     conversationId: v.id("conversations"),
   },
+  returns: v.id("messages"),
   handler: async (ctx, args) => {
     const user = await ctx.auth.getUserIdentity();
 
@@ -38,6 +41,7 @@ export const send = mutation({
       role: "assistant",
       userId: user.subject,
     });
+
   },
 });
 
@@ -49,52 +53,96 @@ export const patch = internalMutation({
       v.literal("done"),
       v.literal("error"),
       v.literal("streaming"),
-      v.literal("pending")
-    )
+      v.literal("pending"),
+    ),
+    modelMessages: v.optional(v.array(ModelMessage))
   },
   handler: async (ctx, args) => {
     await ctx.db.patch("messages", args._id, {
       status: args.status,
-      content: args.content
-    })
-  }
-})
-
-export const fetch = internalQuery({
-  args: {
-    conversationId: v.id("conversations")
+      content: args.content,
+      modelMessages: args.modelMessages
+    });
   },
-  handler: async (ctx, args) => {
-    return await ctx.db.query("messages")
-      .withIndex("by_conversation_status", q => q
-        .eq("conversationId", args.conversationId)
-        .eq("status", "done")
-      )
-      .order("asc")
-      .take(200)
-  }
-})
+});
 
-export const list = query({
+export const fetch = query({
   args: {
-    conversationId: v.id("conversations")
+    conversationId: v.id("conversations"),
   },
+  returns: v.array(v.object({
+    _id: v.id("messages"),
+    _creationTime: v.number(),
+    ...schema.tables.messages.validator.fields
+  })),
   handler: async (ctx, args) => {
-    const user = await ctx.auth.getUserIdentity()
+    const user = await ctx.auth.getUserIdentity();
 
     if (!user) {
-      throw new Error("Unauthenticated")
+      throw new Error("Unauthenticated");
     }
 
     if (!user.orgId) {
-      throw new Error("User must be in an organization")
+      throw new Error("User must be in an organization");
     }
 
-    return await ctx.db.query("messages")
-      .withIndex("by_conversation_status", q => q
-        .eq("conversationId", args.conversationId)
+    const conversation = await ctx.db
+      .query("conversations")
+      .withIndex("by_id", (q) => q.eq("_id", args.conversationId))
+      .first();
+
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    if (user.orgId !== conversation.orgId) {
+      throw new Error("Unauthorized");
+    }
+
+    return await ctx.db
+      .query("messages")
+      .withIndex("by_conversation_status", (q) =>
+        q.eq("conversationId", args.conversationId).eq("status", "done"),
       )
-      .order("desc")
-      .take(200)
-  }
-})
+      .order("asc")
+      .take(200);
+  },
+});
+
+export const list = query({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.auth.getUserIdentity();
+
+    if (!user) {
+      throw new Error("Unauthenticated");
+    }
+
+    if (!user.orgId) {
+      throw new Error("User must be in an organization");
+    }
+
+    const conversation = await ctx.db
+      .query("conversations")
+      .withIndex("by_id", (q) => q.eq("_id", args.conversationId))
+      .first();
+
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    if (user.orgId !== conversation.orgId) {
+      throw new Error("Unauthorized");
+    }
+
+    return await ctx.db
+      .query("messages")
+      .withIndex("by_conversation_status", (q) =>
+        q.eq("conversationId", args.conversationId),
+      )
+      .order("asc")
+      .take(200);
+  },
+});
