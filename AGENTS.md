@@ -16,6 +16,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 5. **VERIFICATION:** ALWAYS remind the user to run `npm run lint` and `npm run build` to verify the codebase before finishing a branch or creating a PR.
 6. **FOLLOW THE PLAN:** Refer to `IMPLEMENTATION_PLAN.md` in the root directory for the step-by-step roadmap.
 7. **NO UNSOLICITED COMMANDS:** Do not write, suggest, or execute shell commands, terminal inputs, package installation commands, or git operations unless the user explicitly asks for them in the prompt (e.g., "Tell me the command to..."). Focus on guiding the user conceptually on what tasks need to be performed.
+8. **ITERATIVE LEARNING FOR NEW CONCEPTS:** When introducing a concept the user hasn't built before (e.g. first Inngest function, first Convex HTTP action), require them to build and test a minimal proof-of-concept in isolation before wiring it into the larger system. This builds debugging intuition. Skip this only for pure integration plumbing between already-understood concepts.
 
 <!-- convex-ai-start -->
 
