@@ -33,6 +33,11 @@ export function TodoItem({ todo }: TodoItemProps) {
         >
           {todo.text}
         </p>
+        {todo.dueDate && (
+          <p>
+            {new Date(todo.dueDate).toLocaleString()}
+          </p>
+        )}
       </div>
       <Button
         variant="ghost"
